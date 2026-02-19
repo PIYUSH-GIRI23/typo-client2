@@ -1,4 +1,5 @@
 import "./globals.css";
+import Providers from "@/app/state/providers";
 
 export const metadata = {
   title: "Typo - Typing Speed Test",
@@ -8,8 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-white">
-        {children}
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
