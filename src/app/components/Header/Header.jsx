@@ -61,7 +61,6 @@ export default function Header() {
 
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-2xl">⌨️</span>
                     <span className="text-lg font-bold" style={{ color: activeTheme.textColor }}>
                         Typo
                     </span>
@@ -93,13 +92,12 @@ export default function Header() {
                         </>
                     ) : (
                         <div className="relative" ref={profileRef}>
-
                             <button
                                 onClick={() => setProfileOpen(prev => !prev)}
-                                className="px-2 py-1 rounded hover:opacity-80"
+                                className="cursor-pointer px-2 py-1 rounded hover:opacity-80"
                                 style={{ color: activeTheme.textColor }}
                             >
-                                {username} ▾
+                                @{username} ▾
                             </button>
 
                             {profileOpen && (
