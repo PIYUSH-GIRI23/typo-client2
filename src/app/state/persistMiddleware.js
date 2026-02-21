@@ -5,7 +5,8 @@ export const persistMiddleware = (store) => (next) => (action) => {
 
   if (typeof window !== "undefined") {
     if (prevState.modal !== state.modal) {
-      localStorage.setItem("modalSlice", JSON.stringify(state.modal));
+      const { commandModalOpen, ...modalStateToPersist } = state.modal;
+      localStorage.setItem("modalSlice", JSON.stringify(modalStateToPersist));
     }
 
     if (prevState.colorscheme !== state.colorscheme) {
