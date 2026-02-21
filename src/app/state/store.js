@@ -1,21 +1,27 @@
+
 import { configureStore } from "@reduxjs/toolkit";
-import { persistMiddleware } from "./persistMiddleware";
-import { loadPersistedState } from "./persistMiddleware";
+import { combineReducers } from "redux";
+import { persistMiddleware, loadPersistedState } from "./persistMiddleware";
 
 import colorschemeReducer from "./slices/colorschemeSlice";
 import userdataReducer from "./slices/userdataSlice";
 import typingdataReducer from "./slices/typingdataSlice";
 import modalReducer from "./slices/modalSlice";
 
-const preloadedState = loadPersistedState();
+const appReducer = combineReducers({
+  colorscheme: colorschemeReducer,
+  userdata: userdataReducer,
+  typingdata: typingdataReducer,
+  modal: modalReducer,
+});
+
+const preloadedState =
+  typeof window !== "undefined"
+    ? loadPersistedState()
+    : {};
 
 export const store = configureStore({
-  reducer: {
-    colorscheme: colorschemeReducer,
-    userdata: userdataReducer,
-    typingdata: typingdataReducer,
-    modal: modalReducer,
-  },
+  reducer: appReducer,
   preloadedState,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(persistMiddleware),
