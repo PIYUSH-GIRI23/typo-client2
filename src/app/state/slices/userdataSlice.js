@@ -1,8 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loadPersistedState } from "../persistMiddleware";
 
-const persistedState = loadPersistedState();
-const initialState = persistedState.userdata || {
+const initialState = {
     isLoggedIn : false,
     email : '',
     username : '',
@@ -48,13 +46,11 @@ const userdataSlice = createSlice({
             state.username = action.payload.username
         },
         updateUserData : (state, action) => {
-            state.wpm = action.payload.wpm;
-            state.accuracy = action.payload.accuracy;
-            state.testTimings = action.payload.testTimings;
-            state.lastTestTaken = action.payload.lastTestTaken;
-            state.totalPar = action.payload.totalPar;
-            state.maxStreak = action.payload.maxStreak;
-            state.progress = action.payload.progress;
+            state.email = action.payload.email;
+            state.username = action.payload.username;
+            state.firstName = action.payload.firstName;
+            state.lastName = action.payload.lastName;
+            state.lastLogin = action.payload.lastLogin;
         },
         updateAnalytics : (state, action) => {
             state.wpm = action.payload.wpm;

@@ -1,8 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loadPersistedState } from "../persistMiddleware";
 
-const persistedState = loadPersistedState();
-const initialState = persistedState.colorscheme || {
+const initialState = {
     id:1
 }
 const colorschemeSlice = createSlice({

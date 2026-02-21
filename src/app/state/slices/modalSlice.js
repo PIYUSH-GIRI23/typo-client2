@@ -1,9 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loadPersistedState } from "../persistMiddleware";
 
-const persistedState = loadPersistedState();
-const initialState = persistedState.modal || {
+const initialState = {
     searchModalOpen : false,
+    refreshDate : null
 }
 const modalSlice = createSlice({
     name: "modal",
@@ -11,9 +10,12 @@ const modalSlice = createSlice({
     reducers : {
         toggleSearchModal : (state) => {
             state.searchModalOpen = !state.searchModalOpen;
+        },
+        setRefreshDate : (state, action) => {
+            state.refreshDate = action.payload.newDate;
         }
     }
 })
 
-export const { toggleSearchModal } = modalSlice.actions;
+export const { toggleSearchModal , setRefreshDate} = modalSlice.actions;
 export default modalSlice.reducer;

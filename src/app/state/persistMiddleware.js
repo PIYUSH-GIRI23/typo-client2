@@ -1,43 +1,43 @@
 export const persistMiddleware = (store) => (next) => (action) => {
+  const prevState = store.getState();
   const result = next(action);
-  
-  if (typeof window !== 'undefined') {
-    const state = store.getState();
+  const state = store.getState();
 
-    if (state.modal) {
-      localStorage.setItem('modalSlice', JSON.stringify(state.modal));
+  if (typeof window !== "undefined") {
+    if (prevState.modal !== state.modal) {
+      localStorage.setItem("modalSlice", JSON.stringify(state.modal));
     }
 
-    if (state.colorscheme) {
-      localStorage.setItem('colorschemeSlice', JSON.stringify(state.colorscheme));
+    if (prevState.colorscheme !== state.colorscheme) {
+      localStorage.setItem(
+        "colorschemeSlice", JSON.stringify(state.colorscheme));
     }
 
-    if (state.userdata) {
-      localStorage.setItem('userdataSlice', JSON.stringify(state.userdata));
+    if (prevState.userdata !== state.userdata) {
+      localStorage.setItem(
+        "userdataSlice", JSON.stringify(state.userdata));
     }
   }
 
   return result;
 };
 
+
 export const loadPersistedState = () => {
-  if (typeof window === 'undefined') {
-    return {
-      modal: null,
-      colorscheme: null,
-      userdata: null,
-    };
-  }
+  if (typeof window === "undefined") return {};
+
+  const safeParse = (key) => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
 
   return {
-    modal: localStorage.getItem('modalSlice')
-      ? JSON.parse(localStorage.getItem('modalSlice'))
-      : null,
-    colorscheme: localStorage.getItem('colorschemeSlice')
-      ? JSON.parse(localStorage.getItem('colorschemeSlice'))
-      : null,
-    userdata: localStorage.getItem('userdataSlice')
-      ? JSON.parse(localStorage.getItem('userdataSlice'))
-      : null,
+    modal: safeParse("modalSlice"),
+    colorscheme: safeParse("colorschemeSlice"),
+    userdata: safeParse("userdataSlice"),
   };
 };
