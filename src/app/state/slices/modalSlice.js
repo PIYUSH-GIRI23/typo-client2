@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
+import formatDateTime from "@/app/utils/formatDateTime";
 
 const initialState =  {
     refreshDate : null,
+    refreshDateTime : null,
     accountModal:1,
     commandModalOpen: false
 }
@@ -11,7 +13,17 @@ const modalSlice = createSlice({
     initialState,
     reducers : {
         setRefreshDate : (state, action) => {
-            state.refreshDate = action.payload.newDate;
+            const incomingDate = action.payload?.newDate;
+
+            if (incomingDate === null) {
+                state.refreshDate = null;
+                state.refreshDateTime = null;
+                return;
+            }
+
+            const nextDate = typeof incomingDate === "number" ? incomingDate : Date.now();
+            state.refreshDate = nextDate;
+            state.refreshDateTime = formatDateTime(nextDate);
         },
         setAccountModal : (state, action) => {
             state.accountModal = action.payload.value
