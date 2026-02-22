@@ -51,7 +51,11 @@ const Search = () => {
   )
 
   const commands = useMemo(() => {
-    return searchData.filter((item) => !item.requiresLogin || isLoggedIn)
+    return searchData.filter((item) => {
+      if (item.displayFlag === 1) return isLoggedIn
+      if (item.displayFlag === 2) return !isLoggedIn
+      return true
+    })
   }, [isLoggedIn])
 
   const normalizedQuery = query.trim().toLowerCase()
