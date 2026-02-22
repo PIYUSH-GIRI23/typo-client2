@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import Register from '@/app/components/auth/Register'
 
@@ -17,7 +18,9 @@ const RegisterPage = () => {
       </div>
       
       <div className="w-full lg:w-1/2">
-        <Register />
+        <Suspense fallback={null}>
+          <Register />
+        </Suspense>
       </div>
     </div>
   )

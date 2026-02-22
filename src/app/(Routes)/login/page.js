@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import Login from '@/app/components/auth/Login'
 
@@ -17,7 +18,9 @@ const LoginPage = () => {
       </div>
 
       <div className="w-full lg:w-1/2">
-        <Login />
+        <Suspense fallback={null}>
+          <Login />
+        </Suspense>
       </div>
     </div>
   )
