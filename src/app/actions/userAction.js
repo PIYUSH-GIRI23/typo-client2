@@ -73,3 +73,21 @@ export async function deleteAccountAction(payload) {
         };
     }
 }
+
+export async function sendOTPAction(payload) {
+    try {
+        const data =  await userController.sendOTP(payload);
+        return {            
+            success: true,
+            statusCode: 200,
+            data:data.data
+        };
+    } 
+    catch (err) {
+        return {
+            success: false,
+            status: err.status || 500,
+            message: err.message || "An error occurred"
+        };
+    }
+}

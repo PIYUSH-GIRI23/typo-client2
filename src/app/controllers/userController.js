@@ -33,7 +33,7 @@ const sendOTP = async(payload) => {
     throw new Error(validation.message);
   }
 
-  const url = `${env.serverUrl}${env.passwordRoutes.sendOTP}`;
+  const url = `${env.serverUrl}${env.userRoutes.sendOtp}`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -58,7 +58,7 @@ const resetPassword = async(payload) => {
     throw new Error(validation.message);
   }
   
-  const url = `${env.serverUrl}${env.passwordRoutes.resetPassword}`;
+  const url = `${env.serverUrl}${env.userRoutes.resetPassword}`;
   
   const response = await fetch(url, {
     method: 'POST',
