@@ -36,6 +36,7 @@ const Search = () => {
   const isLoggedIn = useSelector((state) => state.userdata.isLoggedIn)
   const colorId = useSelector((state) => state.colorscheme.id)
   const isOpen = useSelector((state) => state.modal.commandModalOpen)
+  const refreshDateTime = useSelector((state) => state.modal.refreshDateTime)
 
   const [query, setQuery] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
@@ -203,7 +204,13 @@ const Search = () => {
             {filteredCommands.map((item, index) => {
               const isActive = index === activeIndex
               const isThemeItem = item.action === "changeColorTheme"
+              const isRefreshItem = item.action === "refreshAction"
               const selectedTheme = isThemeItem && item.val === colorId
+              const rightLabel = selectedTheme
+                ? "Active"
+                : isRefreshItem && refreshDateTime
+                  ? `Last updated at ${refreshDateTime}`
+                  : null
 
               return (
                 <button
@@ -250,12 +257,12 @@ const Search = () => {
                     </div>
                   </div>
 
-                  {selectedTheme && (
+                  {rightLabel && (
                     <span
                       className="text-xs"
                       style={{ color: activeTheme.textColor2 }}
                     >
-                      Active
+                      {rightLabel}
                     </span>
                   )}
                 </button>

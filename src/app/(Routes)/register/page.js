@@ -1,0 +1,26 @@
+'use client'
+
+import React from 'react'
+import dynamic from 'next/dynamic'
+import Register from '@/app/components/auth/Register'
+
+const Theme = dynamic(() => import('@/app/components/auth/Theme'), {
+  loading: () => <div className="w-full h-screen bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center"><p className="text-white text-xl">Loading...</p></div>,
+  ssr: false
+})
+
+const RegisterPage = () => {
+  return (
+    <div className="flex">
+      <div className="hidden lg:block lg:w-1/2">
+        <Theme />
+      </div>
+      
+      <div className="w-full lg:w-1/2">
+        <Register />
+      </div>
+    </div>
+  )
+}
+
+export default RegisterPage
