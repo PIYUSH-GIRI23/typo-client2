@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { useRouter , useSearchParams} from "next/navigation"
 import { registerAction } from "@/app/actions/authAction"
-import LoadingSpinner from "./LoadingSpinner"
+import LoadingSpinner from "@/app/components/LoadingSpinner"
 import {useSelector, useDispatch} from 'react-redux'
 import {login} from '@/app/state/slices/userdataSlice'
 import {setRefreshDate} from '@/app/state/slices/modalSlice'
@@ -98,6 +98,14 @@ const Register = () => {
       {loading && <LoadingSpinner />}
       <div className="flex min-h-screen items-center justify-center px-4 bg-linear-to-br from-blue-50 via-purple-50 to-pink-50 lg:bg-white">
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 text-black shadow-sm">
+        <div className="mb-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-black"
+          >
+            ← Back to home
+          </Link>
+        </div>
         <div className="mb-6 flex items-center justify-center gap-2">
           <Link href="/" className="flex items-center gap-2">
             <span className="hidden sm:block text-2xl font-bold bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
