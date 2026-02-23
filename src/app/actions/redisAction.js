@@ -44,7 +44,7 @@ export async function fetchUsernameAction(payload) {
         return {
             success: true,
             statusCode: 200,
-            data:data.data
+            available: data.available
         };
     } 
     catch (err) {

@@ -8,7 +8,8 @@ export async function getUserAnalyticsAction(payload) {
     return {
       success: true,
       statusCode: 200,
-      data:data.data
+            data: data.data,
+            newTokens: data.newTokens
     };
   } 
   catch (err) {
@@ -26,7 +27,8 @@ export async function getAccountAnalyticsAction(payload) {
         return {
             success: true,
             statusCode: 200,
-            data:data.data
+            data: data.data,
+            newTokens: data.newTokens
         };
     } 
     catch (err) {
@@ -38,13 +40,14 @@ export async function getAccountAnalyticsAction(payload) {
     }
 }
 
-export async function resetAccountAnalyticsAction() {
+export async function resetAccountAnalyticsAction(payload) {
     try {
-        const data =  await analyticsController.resetAccountAnalytics();
+        const data =  await analyticsController.resetAccountAnalytics(payload);
         return {            
             success: true,
             statusCode: 200,
-            data:data.data
+            data: data.data,
+            newTokens: data.newTokens
         };
     } 
     catch (err) {
@@ -62,7 +65,8 @@ export async function updateAccountAnalyticsAction(payload) {
         return {            
             success: true,
             statusCode: 200,
-            data:data.data
+            data: data.data,
+            newTokens: data.newTokens
         };
     } 
     catch (err) {

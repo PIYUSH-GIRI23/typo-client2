@@ -8,7 +8,7 @@ export async function checkUsernameAvailabilityAction(payload) {
     return {
       success: true,
       statusCode: 200,
-      data:data.data
+      available: data.available
     };
   } 
   catch (err) {
@@ -26,7 +26,8 @@ export async function updateUsernameAction(payload) {
         return {            
             success: true,
             statusCode: 200,
-            data:data.data
+            data: data.data,
+            newTokens: data.newTokens
         };
     } 
     catch (err) {
@@ -62,7 +63,8 @@ export async function deleteAccountAction(payload) {
         return {            
             success: true,
             statusCode: 200,
-            data:data.data
+            data: data.data,
+            newTokens: data.newTokens
         };
     } 
     catch (err) {
