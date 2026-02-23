@@ -21,7 +21,6 @@ const checkUsernameAvailability = async(payload) => {
   if (!response.ok) {
     throw new Error(data.message || 'Failed to check username availability');
   }
-
   return data;
 };
 const sendOTP = async(payload) => {
@@ -84,7 +83,7 @@ const updateUsername = async(payload) => {
     throw new Error(validation.message);
   }
 
-  const url = `${env.serverUrl}${env.userRoutes.changeUsername}`;
+  const url = `${env.serverUrl}${env.userRoutes.updateUsername}`;
 
   const access_token = payload.access_token;
   const refresh_token = payload.refresh_token;
@@ -120,8 +119,12 @@ const updateUsername = async(payload) => {
 
   const new_access_token = response.headers.get('New-Access-Token');
   const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
 
-  return {data,token};
+  return { data, newTokens };
 }
 const deleteAccount = async(payload) => {
   if(!payload || !payload.password || !payload.confirmPassword) {
@@ -166,7 +169,14 @@ const deleteAccount = async(payload) => {
     throw new Error(data.message || 'Failed to delete account');
   }
 
-  return data;
+  const new_access_token = response.headers.get('New-Access-Token');
+  const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
+
+  return { data, newTokens };
 };
 
 const userController = {

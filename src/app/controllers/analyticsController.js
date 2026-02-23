@@ -37,8 +37,12 @@ const getUserAnalytics = async(payload) => {
 
   const new_access_token = response.headers.get('New-Access-Token');
   const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
 
-  return {data,token};
+  return { data, newTokens };
 };
 const getAccountAnalytics = async(payload) => {
   if(!payload && !payload.username) {
@@ -84,8 +88,12 @@ const getAccountAnalytics = async(payload) => {
 
   const new_access_token = response.headers.get('New-Access-Token');
   const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
 
-  return {data,token};
+  return { data, newTokens };
 };
 const resetAccountAnalytics = async(payload) => {
   const url = `${env.serverUrl}${env.analyticsRoutes.resetAnalytics}`;
@@ -102,14 +110,14 @@ const resetAccountAnalytics = async(payload) => {
     access_token,
     refresh_token
   }
-
   const response = await fetch(url, {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'token' : JSON.stringify(token)
     },
   });
+  console.log(response)
   const data = await response.json();
   if(response.status === 401 || response.status === 403) {
     const error = new Error(data.message || 'Unauthorized');
@@ -123,8 +131,12 @@ const resetAccountAnalytics = async(payload) => {
 
   const new_access_token = response.headers.get('New-Access-Token');
   const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
 
-  return {data,token};
+  return { data, newTokens };
 };
 const updateAccountAnalytics = async(payload) => {
   const url = `${env.serverUrl}${env.analyticsRoutes.updateAnalytics}`;
@@ -165,8 +177,12 @@ const updateAccountAnalytics = async(payload) => {
 
   const new_access_token = response.headers.get('New-Access-Token');
   const new_refresh_token = response.headers.get('New-Refresh-Token');
+  const newTokens = {
+    accessToken: new_access_token || null,
+    refreshToken: new_refresh_token || null
+  };
 
-  return {data,token};
+  return { data, newTokens };
 };
 
 const analyticsController = {

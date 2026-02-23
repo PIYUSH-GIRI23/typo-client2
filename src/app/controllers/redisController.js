@@ -23,7 +23,9 @@ const fetchUsername = async (payload) => {
   }
   const redis = await connectRedis();
   const exists = await redis.exists(`username:${validate.data}`);
-  return exists === 1;
+  return {
+    available: !(exists === 1)
+  };
 }
 
 const redisController = {
