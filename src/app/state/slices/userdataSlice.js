@@ -7,6 +7,7 @@ const initialState = {
     firstName : '',
     lastName : '',
     lastLogin : null,
+    dateOfJoining : null,
     wpm: 0,
     accuracy: 0,
     testTimings: 0,
@@ -41,6 +42,7 @@ const userdataSlice = createSlice({
             state.totalPar = 0;
             state.maxStreak = 0;
             state.progress = [];
+            state.dateOfJoining = null;
         },
         updateUsername : (state, action) => {
             state.username = action.payload.username
@@ -51,6 +53,7 @@ const userdataSlice = createSlice({
             state.firstName = action.payload.firstName;
             state.lastName = action.payload.lastName;
             state.lastLogin = action.payload.lastLogin;
+            state.dateOfJoining = action.payload.dateOfJoining;
         },
         updateAnalytics : (state, action) => {
             state.wpm = action.payload.wpm;
