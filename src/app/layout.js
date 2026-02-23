@@ -3,7 +3,7 @@ import Providers from "@/app/state/providers";
 import Header from "@/app/components/header/Header";
 import Search from "@/app/components/search/Search";
 import Footer from "@/app/components/footer/Footer";
-
+import FetchDetails from "@/app/components/Account/FetchDetails"
 export const metadata = {
   title: "Typo - Typing Speed Test",
   description: "Improve your typing speed with Typo",
@@ -14,6 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Providers>
+          <FetchDetails />
           <Search />
           <main className="min-h-screen flex flex-col">
             <Header />
