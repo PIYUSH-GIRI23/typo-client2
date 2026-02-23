@@ -1,5 +1,4 @@
-import Account from "@/app/components/Account/Account"
-import FetchDetails from "@/app/components/Account/FetchDetails"
+import Account from "@/app/components/account/Account"
 const page = () => {
   return (
      <>

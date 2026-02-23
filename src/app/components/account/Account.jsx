@@ -5,10 +5,10 @@ import { setAccountModal } from '@/app/state/slices/modalSlice'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 
-import DeleteAccount from '@/app/components/Account/modal/DeleteAccount'
-import ResetAnalytics from '@/app/components/Account/modal/ResetAnalytics'
-import AccountDetails from '@/app/components/Account/modal/AccountDetails'
-import UpdateUsername from '@/app/components/Account/modal/UpdateUsername'
+import DeleteAccount from '@/app/components/account/modal/DeleteAccount'
+import ResetAnalytics from '@/app/components/account/modal/ResetAnalytics'
+import AccountDetails from '@/app/components/account/modal/AccountDetails'
+import UpdateUsername from '@/app/components/account/modal/UpdateUsername'
 import colorSchemeOptions from '@/app/state/colorSchemeOptions'
 
 const Account = () => {
