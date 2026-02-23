@@ -1,11 +1,13 @@
 "use client"
 
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useMemo, useState, useRef, useEffect, useSyncExternalStore } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import colorSchemeOptions from "@/app/state/colorSchemeOptions"
 import { performLogout } from "@/app/utils/logoutUtil"
+import { FiTerminal } from "react-icons/fi"
+import { setCommandModalOpen } from "@/app/state/slices/modalSlice"
 
 export default function Header() {
 
@@ -15,6 +17,7 @@ export default function Header() {
         () => false
     )
 
+    const dispatch = useDispatch()
     const colorId = useSelector((state) => state.colorscheme.id)
     const { isLoggedIn, maxStreak, username, firstName, lastName } = useSelector((state) => state.userdata)
 
@@ -57,12 +60,23 @@ export default function Header() {
         >
             <div className="mx-auto flex items-center justify-between gap-3 px-4 py-3">
 
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2">
-                    <span className="text-lg font-bold" style={{ color: activeTheme.textColor }}>
-                        Typo
-                    </span>
-                </Link>
+                <div className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center gap-2">
+                        <span className="text-lg font-bold" style={{ color: activeTheme.textColor }}>
+                            Typo
+                        </span>
+                    </Link>
+
+                    <button
+                        type="button"
+                        onClick={() => dispatch(setCommandModalOpen({ value: true }))}
+                        className="cursor-pointer rounded-md border px-2 py-1 hover:opacity-80"
+                        style={{ borderColor: activeTheme.divColor2, color: activeTheme.textColor2 }}
+                        aria-label="Open command search"
+                    >
+                        <FiTerminal className="text-base" />
+                    </button>
+                </div>
 
                 {/* Right Section */}
                 <div className="flex items-center gap-4 text-xs sm:text-sm">
@@ -107,7 +121,7 @@ export default function Header() {
                                     }}
                                 >
                                     <Link
-                                        href={`/account/${username}`}
+                                        href="/account"
                                         onClick={() => setProfileOpen(false)}
                                         className="px-3 py-2 hover:opacity-80"
                                         style={{ color: activeTheme.textColor }}
