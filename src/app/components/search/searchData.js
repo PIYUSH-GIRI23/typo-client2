@@ -72,7 +72,7 @@ const searchData=[
         displayFlag: 1,
         description: "Reset or update password",
         action:"accountAction",
-        val:3
+        val:4
     },
     {
         key: "reset analytics",
@@ -80,7 +80,7 @@ const searchData=[
         displayFlag: 1,
         description: "Reset user's analytics",
         action:"accountAction",
-        val:4
+        val:3
     },
     {
         key: "refresh",

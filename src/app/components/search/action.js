@@ -28,9 +28,11 @@ export const logoutAction=()=>{
 }
 export const bailoutAction=()=>{
     store.dispatch(bailOut());
+    navigateTo('/')
 }
 export const startAction=()=>{
     store.dispatch(startAndResetTyping({ para: '' }));
+    navigateTo('/')
 }
 export const accountAction=(val)=>{
     store.dispatch(setAccountModal({
