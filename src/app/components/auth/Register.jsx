@@ -6,7 +6,6 @@ import { registerAction } from "@/app/actions/authAction"
 import LoadingSpinner from "@/app/components/LoadingSpinner"
 import {useSelector, useDispatch} from 'react-redux'
 import {login} from '@/app/state/slices/userdataSlice'
-import {setRefreshDate} from '@/app/state/slices/modalSlice'
 import Link from "next/link"
 const Register = () => {
   const router = useRouter()
@@ -74,19 +73,24 @@ const Register = () => {
         firstName: user.firstName,
         lastName: user.lastName,
         lastLogin: user.lastLogin,
+        dateOfJoining: user.dateOfJoining,
+        wpm: user.wpm,
+        accuracy: user.accuracy,
+        testTimings: user.testTimings,
+        lastTestTaken: user.lastTestTaken,
+        totalPar: user.totalPar,
+        maxStreak: user.maxStreak,
+        progress: user.progress
       }))
-      dispatch(setRefreshDate({
-        newDate: Date.now()
-      }))
-    setPayload({
-      email: "",
-      username: "",
-      firstName: "",
-      lastName: "",
-      password: "",
-      confirmPassword: "",
-      rememberMe: false,
-    })
+      setPayload({
+        email: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+        confirmPassword: "",
+        rememberMe: false,
+      })
 
     const nextPath = searchParams.get("next") || "/"
     router.push(nextPath)

@@ -6,7 +6,6 @@ import { loginAction } from "@/app/actions/authAction"
 import LoadingSpinner from "@/app/components/LoadingSpinner"
 import {useSelector, useDispatch} from 'react-redux'
 import {login} from '@/app/state/slices/userdataSlice'
-import {setRefreshDate} from '@/app/state/slices/modalSlice' 
 import Link from "next/link"
 const Login = () => {
 
@@ -65,9 +64,14 @@ const Login = () => {
       firstName: user.firstName,
       lastName: user.lastName,
       lastLogin: user.lastLogin,
-    }))
-    dispatch(setRefreshDate({
-      newDate: Date.now()
+      dateOfJoining: user.dateOfJoining,
+      wpm: user.wpm,
+      accuracy: user.accuracy,
+      testTimings: user.testTimings,
+      lastTestTaken: user.lastTestTaken,
+      totalPar: user.totalPar,
+      maxStreak: user.maxStreak,
+      progress: user.progress
     }))
 
     setPayload({

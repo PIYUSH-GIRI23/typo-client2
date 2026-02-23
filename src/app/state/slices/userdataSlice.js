@@ -27,6 +27,14 @@ const userdataSlice = createSlice({
             state.firstName = action.payload.firstName;
             state.lastName = action.payload.lastName;
             state.lastLogin = action.payload.lastLogin;
+            state.dateOfJoining = action.payload.dateOfJoining;
+            state.wpm = action.payload.wpm || 0;
+            state.accuracy = action.payload.accuracy || 0;
+            state.testTimings = action.payload.testTimings || 0;
+            state.lastTestTaken = action.payload.lastTestTaken || null;
+            state.totalPar = action.payload.totalPar || 0;
+            state.maxStreak = action.payload.maxStreak || 0;
+            state.progress = action.payload.progress || [];
         },
         logout : (state) => {
             state.isLoggedIn = false;
