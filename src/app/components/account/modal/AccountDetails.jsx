@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useDispatch, useSelector } from 'react-redux'
 import { setAccountModal } from '@/app/state/slices/modalSlice'
-import { startAndResetTyping } from '@/app/state/slices/typingdataSlice'
+import { backToTyping } from '@/app/state/slices/typingdataSlice'
 import formatDateTime from "@/app/utils/formatDateTime"
 import colorSchemeOptions from '@/app/state/colorSchemeOptions'
 import { useMemo } from 'react'
@@ -136,7 +136,7 @@ const AccountDetails = () => {
 
         <button
           onClick={() => {
-            dispatch(startAndResetTyping({ para: '' }))
+            dispatch(backToTyping());
             router.push("/")
           }}
           className="rounded-md border px-3 py-2 text-sm text-left"
