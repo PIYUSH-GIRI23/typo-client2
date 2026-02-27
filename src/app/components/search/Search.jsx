@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { usePathname } from "next/navigation"
 import colorSchemeOptions from "@/app/state/colorSchemeOptions"
 import { setCommandModalOpen, toggleCommandModal } from "@/app/state/slices/modalSlice"
 import searchData from "@/app/components/search/searchData"
@@ -36,9 +37,11 @@ const actionHandlers = {
 const Search = () => {
   const dispatch = useDispatch()
   const isLoggedIn = useSelector((state) => state.userdata.isLoggedIn)
+  const isTyping = useSelector((state) => state.typingdata.isTyping)
   const colorId = useSelector((state) => state.colorscheme.id)
   const isOpen = useSelector((state) => state.modal.commandModalOpen)
   const refreshDateTime = useSelector((state) => state.modal.refreshDateTime)
+  const pathname = usePathname()
 
   const [query, setQuery] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
@@ -54,11 +57,13 @@ const Search = () => {
 
   const commands = useMemo(() => {
     return searchData.filter((item) => {
+      if (item.action === "bailoutAction" && !isTyping) return false
+      if (item.action === "bailoutAction" && pathname !== "/") return false
       if (item.displayFlag === 1) return isLoggedIn
       if (item.displayFlag === 2) return !isLoggedIn
       return true
     })
-  }, [isLoggedIn])
+  }, [isLoggedIn, isTyping, pathname])
 
   const normalizedQuery = query.trim().toLowerCase()
 

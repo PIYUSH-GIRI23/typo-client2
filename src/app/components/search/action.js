@@ -4,10 +4,11 @@ import { setColorScheme } from "@/app/state/slices/colorschemeSlice"
 import { setAccountModal } from "@/app/state/slices/modalSlice"
 import { logout } from "@/app/state/slices/userdataSlice";
 import { performLogout } from "@/app/utils/logoutUtil";
-import { bailOut , startAndResetTyping } from "@/app/state/slices/typingdataSlice";
+import { bailOut , backToTyping } from "@/app/state/slices/typingdataSlice";
 
 const navigateTo = (path) => {
     if (typeof window !== "undefined") {
+        if (window.location.pathname === path) return;
         window.location.assign(path);
     }
 }
@@ -31,7 +32,7 @@ export const bailoutAction=()=>{
     navigateTo('/')
 }
 export const startAction=()=>{
-    store.dispatch(startAndResetTyping({ para: '' }));
+    store.dispatch(backToTyping());
     navigateTo('/')
 }
 export const accountAction=(val)=>{
