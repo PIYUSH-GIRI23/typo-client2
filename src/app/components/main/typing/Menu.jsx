@@ -25,7 +25,7 @@ import {
   changeLength
 } from '@/app/state/slices/typingdataSlice';
 
-const Menu = () => {
+const Menu = ({ isHidden = false }) => {
   const isClient = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -244,7 +244,10 @@ const Menu = () => {
         }
       `}</style>
 
-      <div className="flex items-center justify-center w-full">
+      <div
+        className={`flex items-center justify-center w-full overflow-hidden transition-all duration-300 ease-in-out ${isHidden ? 'opacity-0 -translate-y-3 pointer-events-none' : 'opacity-100 translate-y-0'}`}
+        style={{ maxHeight: isHidden ? 0 : 200 }}
+      >
         <div
           className="flex flex-wrap items-center justify-center gap-4 px-4 sm:px-6 py-3 rounded-lg border mt-10"
           style={{

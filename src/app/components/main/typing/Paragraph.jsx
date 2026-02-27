@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo, useSyncExternalStore } from 'react'
-import { useSelector } from 'react-redux'
+import { useState, useEffect, useRef, useMemo, useSyncExternalStore, useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { stopTyping } from '@/app/state/slices/typingdataSlice'
 import colorSchemeOptions from '@/app/state/colorSchemeOptions'
 
-const Paragraph = () => {
+const Paragraph = ({ onFocusChange }) => {
+    const dispatch = useDispatch()
     const isClient = useSyncExternalStore(
         () => () => {},
         () => true,
@@ -25,6 +27,7 @@ const Paragraph = () => {
 
     const boxRef = useRef(null)
     const hiddenInputRef = useRef(null)
+    const hasEndedByTimerRef = useRef(false)
     const typingStatsRef = useRef({
         typedWords: 0,
         wrongWordsCount: 0,
@@ -35,6 +38,7 @@ const Paragraph = () => {
         () => lines.join(' ').trim().split(/\s+/).filter(Boolean),
         [lines]
     )
+    const isParagraphLoading = words.length === 0
 
     const activeTheme = useMemo(
         () => colorSchemeOptions.find((option) => option.id === id) ?? colorSchemeOptions[0],
@@ -94,7 +98,12 @@ const Paragraph = () => {
     }, [])
 
     useEffect(() => {
+        onFocusChange?.(isFocused)
+    }, [isFocused, onFocusChange])
+
+    useEffect(() => {
         const resetTimeout = setTimeout(() => {
+            hasEndedByTimerRef.current = false
             setTotalWordCount(words.length)
             setTypedWordCount(0)
             setElapsedSeconds(0)
@@ -117,6 +126,25 @@ const Paragraph = () => {
         return () => clearInterval(interval)
     }, [isFocused, userSelectedTime, timeRemaining])
 
+    const handleEndTest = useCallback(() => {
+        if (hasEndedByTimerRef.current) return
+        hasEndedByTimerRef.current = true
+
+        // fake score comment: use typedWords and elapsedSeconds to calculate gross WPM
+        // fake score comment: subtract wrongWordsCount impact to calculate net WPM
+        // fake score comment: calculate accuracy % from correct characters vs total characters typed
+        // fake score comment: build final score object and send to analytics API/store
+
+        dispatch(stopTyping())
+    }, [dispatch])
+
+    useEffect(() => {
+        if (!userSelectedTime || Number(userSelectedTime) <= 0) return
+        if (timeRemaining !== 0) return
+
+        handleEndTest()
+    }, [timeRemaining, userSelectedTime, handleEndTest])
+
     const moveToNextWord = () => {
         if (currentWordIndex >= words.length) return
 
@@ -138,11 +166,13 @@ const Paragraph = () => {
         }
 
         setCurrentInput('')
-        setCurrentWordIndex((prev) => {
-            const nextIndex = Math.min(prev + 1, words.length)
-            setTypedWordCount(nextIndex)
-            return nextIndex
-        })
+        const nextIndex = Math.min(currentWordIndex + 1, words.length)
+        setCurrentWordIndex(nextIndex)
+        setTypedWordCount(nextIndex)
+
+        if (nextIndex >= words.length) {
+            handleEndTest()
+        }
     }
 
     const handleKeyDown = (event) => {
@@ -174,10 +204,33 @@ const Paragraph = () => {
         }
     }
 
-    const focusTyping = () => {
+    const focusTyping = useCallback(() => {
         setIsFocused(true)
         hiddenInputRef.current?.focus()
-    }
+    }, [])
+
+    useEffect(() => {
+        if (isFocused || isParagraphLoading) return
+
+        const handleGlobalFocusKey = (event) => {
+            if (event.ctrlKey || event.metaKey || event.altKey) return
+
+            const target = event.target
+            const isTypingTarget = target instanceof HTMLElement && (
+                target.tagName === 'INPUT' ||
+                target.tagName === 'TEXTAREA' ||
+                target.tagName === 'SELECT' ||
+                target.isContentEditable
+            )
+            if (isTypingTarget) return
+
+            event.preventDefault()
+            focusTyping()
+        }
+
+        window.addEventListener('keydown', handleGlobalFocusKey)
+        return () => window.removeEventListener('keydown', handleGlobalFocusKey)
+    }, [isFocused, isParagraphLoading, focusTyping])
 
     const renderWord = (word, wordGlobalIndex) => {
         const isCompletedWord = wordGlobalIndex < currentWordIndex
@@ -230,6 +283,7 @@ const Paragraph = () => {
         lineIndex,
         Math.min(lineIndex + 3, lineWordRanges.length)
     )
+    const shouldBlurParagraph = !isFocused && !isParagraphLoading
 
     if (!isClient) return null
 
@@ -241,8 +295,17 @@ const Paragraph = () => {
                     50%, 100% { opacity: 0; }
                 }
 
+                @keyframes typingLoaderPulse {
+                    0%, 100% { opacity: 0.35; transform: scale(1); }
+                    50% { opacity: 1; transform: scale(1.08); }
+                }
+
                 .caret-blink {
                     animation: caretBlink 1s steps(1, end) infinite;
+                }
+
+                .typing-loader-dot {
+                    animation: typingLoaderPulse 1.1s ease-in-out infinite;
                 }
             `}</style>
 
@@ -278,7 +341,7 @@ const Paragraph = () => {
                     id='typing-box'
                     ref={boxRef}
                     onClick={focusTyping}
-                    className='w-[80vw] p-4 font-mono text-3xl leading-relaxed tracking-wide cursor-text select-none rounded-xl min-h-64 flex flex-col justify-between'
+                    className='relative w-[80vw] p-4 font-mono text-3xl leading-relaxed tracking-wide cursor-text select-none rounded-xl min-h-64 flex flex-col justify-between'
                     style={{
                         
                         color: activeTheme.textColor
@@ -291,28 +354,67 @@ const Paragraph = () => {
                         aria-hidden='true'
                     />
 
-                    <div>
-                        {visibleLineRanges.map((lineData, lineOffset) => {
-                            const { lineWords, start } = lineData
-
-                            return (
-                                <div key={`line-${lineIndex + lineOffset}`} className='whitespace-nowrap'>
-                                    {lineWords.map((word, wordOffset) => {
-                                        const globalWordIndex = start + wordOffset
-
-                                        return (
-                                            <span key={`word-${globalWordIndex}`}>
-                                                {renderWord(word, globalWordIndex)}
-                                                {wordOffset < lineWords.length - 1 ? ' ' : ''}
-                                            </span>
-                                        )
-                                    })}
+                    <div
+                        style={{
+                            filter: shouldBlurParagraph ? 'blur(3px)' : 'none',
+                            opacity: shouldBlurParagraph ? 0.35 : 1,
+                            transition: 'filter 180ms ease, opacity 180ms ease'
+                        }}
+                    >
+                        {isParagraphLoading ? (
+                            <div className='h-40 flex items-center justify-center'>
+                                <div className='flex flex-col items-center gap-4'>
+                                    <div className='flex items-center gap-2'>
+                                        <span className='typing-loader-dot h-2.5 w-2.5 rounded-full' style={{ backgroundColor: activeTheme.textColor2 }} />
+                                        <span className='typing-loader-dot h-2.5 w-2.5 rounded-full' style={{ animationDelay: '0.2s', backgroundColor: activeTheme.textColor2 }} />
+                                        <span className='typing-loader-dot h-2.5 w-2.5 rounded-full' style={{ animationDelay: '0.4s', backgroundColor: activeTheme.textColor2 }} />
+                                    </div>
+                                    <p className='text-sm opacity-80' style={{ color: activeTheme.textColor2 }}>
+                                        Preparing paragraph...
+                                    </p>
                                 </div>
-                            )
-                        })}
+                            </div>
+                        ) : (
+                            visibleLineRanges.map((lineData, lineOffset) => {
+                                const { lineWords, start } = lineData
+
+                                return (
+                                    <div key={`line-${lineIndex + lineOffset}`} className='whitespace-nowrap'>
+                                        {lineWords.map((word, wordOffset) => {
+                                            const globalWordIndex = start + wordOffset
+
+                                            return (
+                                                <span key={`word-${globalWordIndex}`}>
+                                                    {renderWord(word, globalWordIndex)}
+                                                    {wordOffset < lineWords.length - 1 ? ' ' : ''}
+                                                </span>
+                                            )
+                                        })}
+                                    </div>
+                                )
+                            })
+                        )}
                     </div>
 
-                    <div className='mt-4 text-xs sm:text-sm font-medium opacity-90 text-left'>
+                    {!isFocused && !isParagraphLoading && (
+                        <div
+                            className='absolute inset-0 z-10 flex items-center justify-center pointer-events-none'
+                            style={{ color: activeTheme.textColor2 }}
+                        >
+                            <div className='text-sm sm:text-2xl font-medium opacity-90'>
+                                Click here or press any key to focus
+                            </div>
+                        </div>
+                    )}
+
+                    <div
+                        className='mt-4 text-xs sm:text-sm font-medium opacity-90 text-left'
+                        style={{
+                            filter: shouldBlurParagraph ? 'blur(1.5px)' : 'none',
+                            opacity: shouldBlurParagraph ? 0.35 : 0.9,
+                            transition: 'filter 180ms ease, opacity 180ms ease'
+                        }}
+                    >
                         Press Ctrl + Q and select bail out to end the test
                     </div>
                 </div>
