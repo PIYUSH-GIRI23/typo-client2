@@ -80,8 +80,27 @@ const typingSlice = createSlice({
         },
         changeLength : (state,action) => {
             state.length = action.payload.length;
+        },
+        backToTyping : (state) => {
+            state.isBailedOut = false;
+            state.isTyping = true;
         }
     }
 })
-export const { startAndResetTyping, updateStats, setTypingStartTime, updateParaLines, stopTyping, bailOut, togglePunctuation, toggleNumbers, toggleSymbols , changeType, changeDifficulty, changeLength, setTypingParaLines} = typingSlice.actions;
+export const { 
+    startAndResetTyping, 
+    updateStats, 
+    setTypingStartTime, 
+    updateParaLines, 
+    stopTyping, 
+    bailOut, 
+    togglePunctuation, 
+    toggleNumbers, 
+    toggleSymbols , 
+    changeType, 
+    changeDifficulty, 
+    changeLength, 
+    setTypingParaLines,
+    backToTyping
+} = typingSlice.actions;
 export default typingSlice.reducer;
