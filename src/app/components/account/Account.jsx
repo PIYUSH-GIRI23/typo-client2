@@ -55,7 +55,7 @@ const Account = () => {
 
   return (
     <section
-      className="w-full px-4 py-4 sm:px-6 h-[89vh]"
+      className="w-full px-4 py-4 sm:px-6 min-h-[89vh] md:h-[89vh] overflow-y-auto"
       style={{
         backgroundColor: activeTheme.bgColor,
         color: activeTheme.textColor
@@ -156,7 +156,7 @@ const Account = () => {
 
           {/* Content */}
           <div
-            className="rounded-xl border p-4 sm:p-5 h-[80vh]"
+            className="rounded-xl border p-4 sm:p-5 md:h-[80vh] md:overflow-y-auto"
             style={{
               backgroundColor: activeTheme.divColor,
               borderColor: activeTheme.divColor2
