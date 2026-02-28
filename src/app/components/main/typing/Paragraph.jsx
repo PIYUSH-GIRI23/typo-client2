@@ -4,7 +4,11 @@ import { useState, useEffect, useRef, useMemo, useSyncExternalStore, useCallback
 import { useDispatch, useSelector } from 'react-redux'
 import { stopTyping } from '@/app/state/slices/typingdataSlice'
 import colorSchemeOptions from '@/app/state/colorSchemeOptions'
-
+import calculateUpdatedScore from '@/app/utils/score'
+import {updateAccountAnalyticsAction} from '@/app/actions/analyticsAction'
+import {updateAnalytics} from '@/app/state/slices/userdataSlice'
+import { performLogout } from '@/app/utils/logoutUtil'
+import { updateScore, markScoreSyncStart, markScoreSynced, markScoreSyncFailed } from '@/app/state/slices/userscoreSlice'
 const Paragraph = ({ onFocusChange }) => {
     const dispatch = useDispatch()
     const isClient = useSyncExternalStore(
@@ -16,6 +20,8 @@ const Paragraph = ({ onFocusChange }) => {
     const id = useSelector((state) => state.colorscheme.id)
     const lines = useSelector((state) => state.typingdata.editedParaLines)
     const userSelectedTime = useSelector((state) => state.typingdata.selectedTime)
+    const isBailedOut = useSelector(state => state.typingdata.isBailedOut);
+    const {isLoggedIn,wpm, accuracy, testTimings, lastTestTaken, totalPar, maxStreak } = useSelector((state) => state.userdata)
 
     const [currentWordIndex, setCurrentWordIndex] = useState(0)
     const [currentInput, setCurrentInput] = useState('')
@@ -28,6 +34,16 @@ const Paragraph = ({ onFocusChange }) => {
     const boxRef = useRef(null)
     const hiddenInputRef = useRef(null)
     const hasEndedByTimerRef = useRef(false)
+    const elapsedSecondsRef = useRef(0)
+    const isLoggedInRef = useRef(isLoggedIn)
+    const prevSpecsRef = useRef({
+        wpm,
+        accuracy,
+        testTimings,
+        lastTestTaken,
+        totalPar,
+        maxStreak
+    })
     const typingStatsRef = useRef({
         typedWords: 0,
         wrongWordsCount: 0,
@@ -49,6 +65,11 @@ const Paragraph = ({ onFocusChange }) => {
         if (!userSelectedTime || Number(userSelectedTime) <= 0) return null
         return Math.max(Number(userSelectedTime) - elapsedSeconds, 0)
     }, [userSelectedTime, elapsedSeconds])
+
+    const hasSelectedTime = useMemo(
+        () => Number(userSelectedTime) > 0,
+        [userSelectedTime]
+    )
 
     const lineWordRanges = useMemo(() => {
         let nextWordIndex = 0
@@ -107,37 +128,193 @@ const Paragraph = ({ onFocusChange }) => {
             setTotalWordCount(words.length)
             setTypedWordCount(0)
             setElapsedSeconds(0)
+            elapsedSecondsRef.current = 0
             setCurrentWordIndex(0)
             setCurrentInput('')
             setTypedWords([])
+            typingStatsRef.current = {
+                typedWords: 0,
+                wrongWordsCount: 0,
+                wrongWords: []
+            }
         }, 0)
 
         return () => clearTimeout(resetTimeout)
     }, [words])
 
     useEffect(() => {
-        if (!isFocused || !userSelectedTime || Number(userSelectedTime) <= 0) return
-        if (timeRemaining === 0) return
+        elapsedSecondsRef.current = elapsedSeconds
+    }, [elapsedSeconds])
+
+    useEffect(() => {
+        isLoggedInRef.current = isLoggedIn
+    }, [isLoggedIn])
+
+    useEffect(() => {
+        prevSpecsRef.current = {
+            wpm,
+            accuracy,
+            testTimings,
+            lastTestTaken,
+            totalPar,
+            maxStreak
+        }
+    }, [wpm, accuracy, testTimings, lastTestTaken, totalPar, maxStreak])
+
+    useEffect(() => {
+        if (!isFocused) return
+        if (hasSelectedTime && timeRemaining === 0) return
 
         const interval = setInterval(() => {
             setElapsedSeconds((prev) => prev + 1)
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [isFocused, userSelectedTime, timeRemaining])
+    }, [isFocused, hasSelectedTime, timeRemaining])
+    
+     const storeNewTokens = (response) => {
+        const accessToken = response?.newTokens?.accessToken
+        const refreshToken = response?.newTokens?.refreshToken
+
+        if (accessToken) {
+        localStorage.setItem("access_token", accessToken)
+        }
+
+        if (refreshToken) {
+        localStorage.setItem("refresh_token", refreshToken)
+        }
+    }
+    const handleUpdateAnalytics = useCallback(async(dbScore) => {
+        if (!dbScore) return
+
+        dispatch(markScoreSyncStart())
+
+        const access_token = localStorage.getItem("access_token")
+        const refresh_token = localStorage.getItem("refresh_token")
+
+        if (!access_token || !refresh_token) {
+            dispatch(markScoreSyncFailed())
+            performLogout()
+            return
+        }
+
+        const payload={
+            access_token,
+            refresh_token,
+            wpm : dbScore.wpm,
+            accuracy : dbScore.accuracy,
+            testTimings : dbScore.testTimings,
+            maxStreak : dbScore.maxStreak,
+            lastTestTaken : dbScore.lastTestTaken,
+        }
+
+
+        const response = await updateAccountAnalyticsAction(payload)
+        
+        if (response?.status === 401 || response?.status === 403) {
+            dispatch(markScoreSyncFailed())
+            performLogout()
+            return
+        }
+
+        
+        if (!response?.success) {
+            dispatch(markScoreSyncFailed())
+            console.error("Failed to update analytics:", response?.message || "Unknown error")
+            return
+        }
+        
+        storeNewTokens(response)
+
+        dispatch(updateAnalytics({
+            wpm : dbScore.wpm,
+            accuracy : dbScore.accuracy,
+            testTimings : dbScore.testTimings,
+            maxStreak : dbScore.maxStreak,
+            lastTestTaken : dbScore.lastTestTaken,
+            totalPar : dbScore.totalPar,
+            progress: [...(response?.data?.progress || [])]
+        }))
+
+        dispatch(markScoreSynced())
+    }, [dispatch])
+
+    const findScore = useCallback(() => {
+        const currSpecs = {
+            wrongWordsCount : typingStatsRef.current.wrongWordsCount,
+            totalWordsCount : typingStatsRef.current.typedWords,
+            timeTaken : elapsedSecondsRef.current
+        }
+
+        const {currScore,dbScore} = calculateUpdatedScore(currSpecs, prevSpecsRef.current)
+
+        if (!currScore?.success) {
+            dispatch(updateScore({
+                totalWordscount : currSpecs.totalWordsCount,
+                wrongWordsCount : currSpecs.wrongWordsCount,
+                correctWordsCount : Math.max(0, currSpecs.totalWordsCount - currSpecs.wrongWordsCount),
+                timeTaken : currSpecs.timeTaken,
+                wrongWords : typingStatsRef.current.wrongWords,
+                decimal_accuracy : 0,
+                int_accuracy : 0,
+                decimal_rawWpm : 0,
+                int_rawWpm : 0,
+                decimal_netWpm : 0,
+                int_netWpm : 0,
+                decimal_finalScore : 0,
+                int_finalScore : 0,
+                needsDbSync : false
+            }))
+
+            return {
+                currScore,
+                dbScore: null
+            }
+        }
+
+        dispatch(updateScore({
+            totalWordscount : currScore.totalWordsCount,
+            wrongWordsCount : currScore.wrongWordsCount,
+            correctWordsCount : currScore.correctWordsCount,
+            timeTaken : currScore.timeTaken,
+            wrongWords : typingStatsRef.current.wrongWords,
+            decimal_accuracy : currScore.decimal_accuracy,
+            int_accuracy : currScore.int_accuracy,
+            decimal_rawWpm : currScore.decimal_rawWpm,
+            int_rawWpm : currScore.int_rawWpm,
+            decimal_netWpm : currScore.decimal_netWpm,
+            int_netWpm : currScore.int_netWpm,
+            decimal_finalScore : currScore.decimal_finalScore,
+            int_finalScore : currScore.int_finalScore,
+            needsDbSync : !!dbScore
+        }))
+
+        return {
+            currScore,
+            dbScore
+        }
+    }, [dispatch])
 
     const handleEndTest = useCallback(() => {
         if (hasEndedByTimerRef.current) return
         hasEndedByTimerRef.current = true
 
-        // fake score comment: use typedWords and elapsedSeconds to calculate gross WPM
-        // fake score comment: subtract wrongWordsCount impact to calculate net WPM
-        // fake score comment: calculate accuracy % from correct characters vs total characters typed
-        // fake score comment: build final score object and send to analytics API/store
-
+        const { dbScore } = findScore()
         dispatch(stopTyping())
-    }, [dispatch])
 
+        if (isLoggedInRef.current && dbScore) {
+            void handleUpdateAnalytics(dbScore)
+        }
+
+    }, [dispatch, findScore, handleUpdateAnalytics])
+
+    useEffect(() => {
+        if (!isBailedOut) {
+            return
+        }
+
+        handleEndTest()
+    }, [isBailedOut, handleEndTest])
     useEffect(() => {
         if (!userSelectedTime || Number(userSelectedTime) <= 0) return
         if (timeRemaining !== 0) return
@@ -160,9 +337,14 @@ const Paragraph = ({ onFocusChange }) => {
         typingStatsRef.current = {
             typedWords: typingStatsRef.current.typedWords + 1,
             wrongWordsCount: typingStatsRef.current.wrongWordsCount + (isWrongWord ? 1 : 0),
-            wrongWords: isWrongWord
-                ? [...typingStatsRef.current.wrongWords, currentInput]
-                : typingStatsRef.current.wrongWords
+            wrongWords: [
+                ...typingStatsRef.current.wrongWords,
+                {
+                    expected: originalWord,
+                    typed: currentInput,
+                    isCorrect: !isWrongWord
+                }
+            ]
         }
 
         setCurrentInput('')
@@ -251,6 +433,9 @@ const Paragraph = ({ onFocusChange }) => {
             const showCaretAtWordEnd = isCurrentWord && isFocused && typedText.length >= word.length && i === word.length - 1
             const charClassName = [
                 'relative',
+                'transition-colors',
+                'duration-150',
+                'ease-out',
                 isWrongChar ? 'text-red-600' : ''
             ].filter(Boolean).join(' ')
             const charStyle = isCorrectChar
@@ -261,14 +446,14 @@ const Paragraph = ({ onFocusChange }) => {
                 <span key={`${wordGlobalIndex}-${i}`} className={charClassName} style={charStyle}>
                     {showCaretBeforeChar && (
                         <span
-                            className='absolute left-0 top-0 h-full border-l-2 -translate-x-px caret-blink'
+                            className='absolute left-0 top-0 h-full border-l-2 -translate-x-px caret-blink caret-smooth'
                             style={{ borderColor: activeTheme.textColor2 }}
                         />
                     )}
                     {word[i]}
                     {showCaretAtWordEnd && (
                         <span
-                            className='absolute right-0 top-0 h-full border-l-2 translate-x-full caret-blink'
+                            className='absolute right-0 top-0 h-full border-l-2 translate-x-full caret-blink caret-smooth'
                             style={{ borderColor: activeTheme.textColor2 }}
                         />
                     )}
@@ -304,6 +489,11 @@ const Paragraph = ({ onFocusChange }) => {
                     animation: caretBlink 1s steps(1, end) infinite;
                 }
 
+                .caret-smooth {
+                    transition: transform 110ms ease-out, opacity 110ms ease-out;
+                    will-change: transform, opacity;
+                }
+
                 .typing-loader-dot {
                     animation: typingLoaderPulse 1.1s ease-in-out infinite;
                 }
@@ -330,6 +520,15 @@ const Paragraph = ({ onFocusChange }) => {
                             <span className='opacity-75'>Time left</span>
                             <span className='font-semibold' style={{ color: activeTheme.textColor2 }}>
                                 {`${timeRemaining}s`}
+                            </span>
+                        </>
+                    )}
+
+                    {timeRemaining === null && (
+                        <>
+                            <span className='opacity-75'>Time elapsed</span>
+                            <span className='font-semibold' style={{ color: activeTheme.textColor2 }}>
+                                {`${elapsedSeconds}s`}
                             </span>
                         </>
                     )}
