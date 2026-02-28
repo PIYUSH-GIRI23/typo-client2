@@ -34,6 +34,30 @@ const CustomPara = ({ isOpen, onClose }) => {
         setError({ status: false, message: '' })
     }, [onClose])
 
+    const getTypingBoxMetrics = useCallback(() => {
+        if (typeof window === 'undefined') return null;
+
+        const element = document.getElementById('typing-box');
+        if (!element) return null;
+
+        const style = window.getComputedStyle(element);
+        const width = element.clientWidth;
+        const paddingLeft = parseFloat(style.paddingLeft) || 0;
+        const paddingRight = parseFloat(style.paddingRight) || 0;
+        const letterSpacing = parseFloat(style.letterSpacing) || 0;
+        const wordSpacing = parseFloat(style.wordSpacing) || 0;
+        const usableWidth = width - paddingLeft - paddingRight;
+
+        const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+
+        return {
+        usableWidth,
+        font,
+        letterSpacing,
+        wordSpacing
+        };
+    }, []);
+
     const setTypingParaLinesHandler = useCallback(() => {
         const nextLength = Number(paraLength)
 
@@ -47,7 +71,14 @@ const CustomPara = ({ isOpen, onClose }) => {
 
         const words = originalPara.trim().split(/\s+/).filter(Boolean)
         const newPara = words.slice(0, nextLength).join(' ')
-        const paraLines = paraToLines(newPara)
+        const metrics = getTypingBoxMetrics()
+        const paraLines = paraToLines(
+                            newPara,
+                            metrics.usableWidth,
+                            metrics.font,
+                            metrics.letterSpacing,
+                            metrics.wordSpacing
+                           );
 
         dispatch(setTypingParaLines({
             para: newPara,
@@ -56,7 +87,7 @@ const CustomPara = ({ isOpen, onClose }) => {
 
         setError({ status: false, message: '' })
         onClose()
-    }, [dispatch, originalPara, paraLength, totalWords, onClose])
+    }, [dispatch, originalPara, paraLength, totalWords, onClose, getTypingBoxMetrics])
 
     useEffect(() => {
         if (!isOpen) return
