@@ -342,10 +342,4 @@ This section documents every file currently present in the repository (excluding
 
 ---
 
-## 10) Improvement Backlog (Suggested)
-
-- Add automated tests for critical flows: typing score math, auth action error paths, command search filtering.
-- Move token storage to secure httpOnly cookie strategy if backend architecture allows.
-- Extract repeated token refresh/header handling to a shared request client helper.
-- Add stricter TypeScript typings for payload contracts to reduce runtime shape assumptions.
 
