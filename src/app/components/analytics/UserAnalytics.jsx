@@ -406,7 +406,7 @@ const Panel = ({ title, children, theme, helpText }) => (
   </div>
 )
 
-const ChartFrame = ({ children }) => <div className="h-[290px]">{children}</div>
+const ChartFrame = ({ children }) => <div className="h-72.5">{children}</div>
 
 const InfoChip = ({ label, value, theme, full = false, helpText }) => (
   <div
