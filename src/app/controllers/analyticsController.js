@@ -8,7 +8,7 @@ const getUserAnalytics = async(payload) => {
   const refresh_token = payload.refresh_token;
   if(!access_token || !refresh_token) {
     const error = new Error('Authentication tokens are required');
-    err.status = 401;
+    error.status = 401;
     throw error;
   }
 
@@ -45,7 +45,7 @@ const getUserAnalytics = async(payload) => {
   return { data, newTokens };
 };
 const getAccountAnalytics = async(payload) => {
-  if(!payload && !payload.username) {
+  if(!payload || !payload.username) {
     throw new Error('Username is required');
   }
   const validation = validateUsername(payload.username);
@@ -58,7 +58,7 @@ const getAccountAnalytics = async(payload) => {
   const refresh_token = payload.refresh_token;
   if(!access_token || !refresh_token) {
     const error = new Error('Authentication tokens are required');
-    err.status = 401;
+    error.status = 401;
     throw error;
   }
 
@@ -102,7 +102,7 @@ const resetAccountAnalytics = async(payload) => {
   const refresh_token = payload.refresh_token;
   if(!access_token || !refresh_token) {
     const error = new Error('Authentication tokens are required');
-    err.status = 401;
+    error.status = 401;
     throw error;
   }
 
@@ -145,7 +145,7 @@ const updateAccountAnalytics = async(payload) => {
   const refresh_token = payload.refresh_token;
   if(!access_token || !refresh_token) {
     const error = new Error('Authentication tokens are required');
-    err.status = 401;
+    error.status = 401;
     throw error;
   }
 
