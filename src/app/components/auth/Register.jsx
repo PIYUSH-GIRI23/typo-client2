@@ -3,14 +3,19 @@
 import React, { useState } from "react"
 import { useRouter , useSearchParams} from "next/navigation"
 import { registerAction } from "@/app/actions/authAction"
+import { updateAccountAnalyticsAction } from "@/app/actions/analyticsAction"
 import LoadingSpinner from "@/app/components/LoadingSpinner"
 import {useSelector, useDispatch} from 'react-redux'
-import {login} from '@/app/state/slices/userdataSlice'
+import {login, updateAnalytics} from '@/app/state/slices/userdataSlice'
+import { backToTyping } from '@/app/state/slices/typingdataSlice'
+import { markScoreSyncFailed, markScoreSyncStart, markScoreSynced } from '@/app/state/slices/userscoreSlice'
+import calculateUpdatedScore from '@/app/utils/score'
 import Link from "next/link"
 const Register = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const dispatch = useDispatch()
+  const scoreState = useSelector((state) => state.userscore)
 
   const [payload, setPayload] = useState({
     email: "",
@@ -82,6 +87,58 @@ const Register = () => {
         maxStreak: user.maxStreak,
         progress: user.progress
       }))
+
+      if (scoreState.needsDbSync) {
+        const currSpecs = {
+          wrongWordsCount: scoreState.wrongWordsCount,
+          totalWordsCount: scoreState.totalWordscount,
+          timeTaken: scoreState.timeTaken
+        }
+
+        const prevSpecs = {
+          wpm: user.wpm,
+          accuracy: user.accuracy,
+          testTimings: user.testTimings,
+          lastTestTaken: user.lastTestTaken,
+          totalPar: user.totalPar,
+          maxStreak: user.maxStreak
+        }
+
+        const { dbScore } = calculateUpdatedScore(currSpecs, prevSpecs)
+
+        if (dbScore) {
+          dispatch(markScoreSyncStart())
+
+          const syncPayload = {
+            access_token: tokens.accessToken,
+            refresh_token: tokens.refreshToken,
+            wpm: dbScore.wpm,
+            accuracy: dbScore.accuracy,
+            testTimings: dbScore.testTimings,
+            maxStreak: dbScore.maxStreak,
+            lastTestTaken: dbScore.lastTestTaken
+          }
+
+          const syncResponse = await updateAccountAnalyticsAction(syncPayload)
+
+          if (syncResponse?.success) {
+            dispatch(updateAnalytics({
+              wpm: dbScore.wpm,
+              accuracy: dbScore.accuracy,
+              testTimings: dbScore.testTimings,
+              maxStreak: dbScore.maxStreak,
+              lastTestTaken: dbScore.lastTestTaken,
+              totalPar: dbScore.totalPar,
+              progress: [...(syncResponse?.data?.progress || [])]
+            }))
+            dispatch(markScoreSynced())
+          } else {
+            dispatch(markScoreSyncFailed())
+          }
+        }
+      }
+
+      dispatch(backToTyping())
       setPayload({
         email: "",
         username: "",
