@@ -130,7 +130,7 @@ export default function Header() {
                                     </Link>
 
                                     <Link
-                                        href={`/analytics/${username}`}
+                                        href={`/analytics`}
                                         onClick={() => setProfileOpen(false)}
                                         className="px-3 py-2 hover:opacity-80"
                                         style={{ color: activeTheme.textColor }}
