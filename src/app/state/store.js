@@ -7,12 +7,14 @@ import colorschemeReducer from "./slices/colorschemeSlice";
 import userdataReducer from "./slices/userdataSlice";
 import typingdataReducer from "./slices/typingdataSlice";
 import modalReducer from "./slices/modalSlice";
+import userscoreReducer from "./slices/userscoreSlice";
 
 const appReducer = combineReducers({
   colorscheme: colorschemeReducer,
   userdata: userdataReducer,
   typingdata: typingdataReducer,
   modal: modalReducer,
+  userscore: userscoreReducer
 });
 
 const preloadedState =
