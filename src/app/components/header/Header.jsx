@@ -8,6 +8,7 @@ import colorSchemeOptions from "@/app/state/colorSchemeOptions"
 import { performLogout } from "@/app/utils/logoutUtil"
 import { FiTerminal } from "react-icons/fi"
 import { setCommandModalOpen } from "@/app/state/slices/modalSlice"
+import {backToTyping} from "@/app/state/slices/typingdataSlice"
 
 export default function Header() {
 
@@ -61,7 +62,7 @@ export default function Header() {
             <div className="mx-auto flex items-center justify-between gap-3 px-4 py-3">
 
                 <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center gap-2" onClick={() => dispatch(backToTyping())}>
                         <span className="text-lg font-bold" style={{ color: activeTheme.textColor }}>
                             Typo
                         </span>
