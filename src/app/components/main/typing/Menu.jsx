@@ -101,7 +101,6 @@ const Menu = ({ isHidden = false }) => {
           return data.content;
       }
       catch(err){
-        console.log("error in fetching paragraph",err);
         return null;
       }
     },[type,length,difficulty])

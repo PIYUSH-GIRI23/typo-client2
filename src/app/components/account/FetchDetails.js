@@ -37,7 +37,7 @@ const AccountStats = () => {
                     access_token,
                     refresh_token
                 });
-                console.log("Fetched user analytics:", response);
+               
                 storeNewTokens(response);
 
                 if (response?.success && response?.data) {

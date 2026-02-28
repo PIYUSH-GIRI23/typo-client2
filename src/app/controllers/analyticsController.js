@@ -117,7 +117,7 @@ const resetAccountAnalytics = async(payload) => {
       'token' : JSON.stringify(token)
     },
   });
-  console.log(response)
+
   const data = await response.json();
   if(response.status === 401 || response.status === 403) {
     const error = new Error(data.message || 'Unauthorized');
