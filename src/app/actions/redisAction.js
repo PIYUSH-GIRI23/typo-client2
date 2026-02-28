@@ -26,7 +26,7 @@ export async function fetchLeaderboardAction(payload) {
         return {
             success: true,
             statusCode: 200,
-            data:data.data
+            data
         };
     } 
     catch (err) {
