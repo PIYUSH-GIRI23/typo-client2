@@ -4,6 +4,22 @@ import Header from "@/app/components/header/Header";
 import Search from "@/app/components/search/Search";
 import Footer from "@/app/components/footer/Footer";
 import FetchDetails from "@/app/components/account/FetchDetails"
+import {stopRedis} from "@/app/init/redis.js";
+
+// Handle graceful shutdown for Redis when the server is stopped
+if (typeof window === "undefined") {
+  process.on("SIGINT", async () => {
+    console.log("Received SIGINT, shutting down gracefully...");
+    await stopRedis();
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", async () => {
+    console.log("Received SIGTERM, shutting down gracefully...");
+    await stopRedis();
+    process.exit(0);
+  });
+}
 export const metadata = {
   title: "Typo - Typing Speed Test",
   description: "Improve your typing speed with Typo",
