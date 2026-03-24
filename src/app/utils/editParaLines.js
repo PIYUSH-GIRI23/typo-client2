@@ -1,5 +1,5 @@
-const editParaLines = (type, paraLines, punctuation = false, numbers = false, symbols = false) => {
-    if (type !== 'para' || !Array.isArray(paraLines) || (!punctuation && !numbers && !symbols)) 
+const editParaLines = (type, paraLines, fullstop = false, punctuation = false, numbers = false, symbols = false) => {
+    if (type !== 'para' || !Array.isArray(paraLines) || (!fullstop && !punctuation && !numbers && !symbols)) 
         return paraLines;
 
     const allowedSymbols = [",", "$", "&", "@"];
@@ -8,6 +8,11 @@ const editParaLines = (type, paraLines, punctuation = false, numbers = false, sy
         if (!text || typeof text !== "string") return text;
 
         text = text.trim();
+
+        // Remove all full stops when the fullstop option is enabled.
+        if (fullstop) {
+            text = text.replace(/\./g, "");
+        }
 
         // Capitalize sentences if punctuation flag is on
         if (punctuation) {

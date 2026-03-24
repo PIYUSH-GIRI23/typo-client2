@@ -17,6 +17,7 @@ import {
   setTypingStartTime, 
   setTypingParaLines,
   updateParaLines, 
+  toggleFullstop,
   togglePunctuation, 
   toggleNumbers, 
   toggleSymbols,
@@ -33,7 +34,7 @@ const Menu = ({ isHidden = false }) => {
   );
 
   const id = useSelector(state => state.colorscheme.id);
-  const {type, selectedTime, punctuation, numbers, symbols, length, difficulty, paraLines, originalPara} = useSelector(state => state.typingdata);
+  const {type, selectedTime, fullstop, punctuation, numbers, symbols, length, difficulty, paraLines, originalPara} = useSelector(state => state.typingdata);
   const dispatch = useDispatch();
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [showCustomPara, setShowCustomPara] = useState(false);
@@ -146,6 +147,9 @@ const Menu = ({ isHidden = false }) => {
         dispatch(changeLength({length: nextLength}));
         await setTypingParaLinesHandler({ length: nextLength });
     },[dispatch, setTypingParaLinesHandler])
+    const toggleFullstopHandler = useCallback(() => {
+      dispatch(toggleFullstop());
+    },[dispatch])
     const togglePunctuationHandler = useCallback(() => {
         dispatch(togglePunctuation());
     },[dispatch])
@@ -157,9 +161,9 @@ const Menu = ({ isHidden = false }) => {
     },[dispatch])
 
     const updateParaLinesHandler = useCallback(() => {
-        const baseEditedLines = editParaLines(type, paraLines, punctuation, numbers, symbols);
+        const baseEditedLines = editParaLines(type, paraLines, fullstop, punctuation, numbers, symbols);
 
-        if (type === 'para' && (punctuation || numbers || symbols)) {
+        if (type === 'para' && (fullstop || punctuation || numbers || symbols)) {
           const editedPara = baseEditedLines.join(' ');
           const reflowedEditedLines = convertParaToLines(editedPara);
 
@@ -172,7 +176,7 @@ const Menu = ({ isHidden = false }) => {
         dispatch(updateParaLines({
           editedParaLines: baseEditedLines
         }));
-    }, [dispatch, type, paraLines, punctuation, numbers, symbols, convertParaToLines])
+    }, [dispatch, type, paraLines, fullstop, punctuation, numbers, symbols, convertParaToLines])
 
     const selectTimeHandler = useCallback((nextTime) => {
       if (selectedTime === nextTime) {
@@ -258,6 +262,13 @@ const Menu = ({ isHidden = false }) => {
             <>
               <div className="flex flex-col items-center gap-2">
                 <div className="flex items-end gap-2">
+                  <span
+                    title="Full stop"
+                    onClick={toggleFullstopHandler}
+                    className={optionStyle(fullstop)}
+                  >
+                    #.
+                  </span>
                   <span
                     title="Numbers"
                     onClick={toggleNumbersHandler}
