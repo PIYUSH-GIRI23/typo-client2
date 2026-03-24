@@ -1,5 +1,5 @@
-const editParaLines = (type, paraLines, fullstop = false, punctuation = false, numbers = false, symbols = false) => {
-    if (type !== 'para' || !Array.isArray(paraLines) || (!fullstop && !punctuation && !numbers && !symbols)) 
+const editParaLines = (type, paraLines, fullstop = false, allsmallcase = false, punctuation = false, numbers = false, symbols = false) => {
+    if (type !== 'para' || !Array.isArray(paraLines) || (!fullstop && !allsmallcase && !punctuation && !numbers && !symbols)) 
         return paraLines;
 
     const allowedSymbols = [",", "$", "&", "@"];
@@ -18,6 +18,10 @@ const editParaLines = (type, paraLines, fullstop = false, punctuation = false, n
         if (punctuation) {
             text = text.charAt(0).toUpperCase() + text.slice(1);
             text = text.replace(/\.\s*(\w)/g, (_, ch) => ". " + ch.toUpperCase());
+        }
+
+        if (allsmallcase) {
+            text = text.toLowerCase();
         }
 
         // Only replace words if numbers or symbols are true

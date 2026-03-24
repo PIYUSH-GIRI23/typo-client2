@@ -18,6 +18,7 @@ import {
   setTypingParaLines,
   updateParaLines, 
   toggleFullstop,
+  toggleAllsmallcase,
   togglePunctuation, 
   toggleNumbers, 
   toggleSymbols,
@@ -34,7 +35,7 @@ const Menu = ({ isHidden = false }) => {
   );
 
   const id = useSelector(state => state.colorscheme.id);
-  const {type, selectedTime, fullstop, punctuation, numbers, symbols, length, difficulty, paraLines, originalPara} = useSelector(state => state.typingdata);
+  const {type, selectedTime, fullstop, allsmallcase, punctuation, numbers, symbols, length, difficulty, paraLines, originalPara} = useSelector(state => state.typingdata);
   const dispatch = useDispatch();
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [showCustomPara, setShowCustomPara] = useState(false);
@@ -150,6 +151,9 @@ const Menu = ({ isHidden = false }) => {
     const toggleFullstopHandler = useCallback(() => {
       dispatch(toggleFullstop());
     },[dispatch])
+    const toggleAllsmallcaseHandler = useCallback(() => {
+      dispatch(toggleAllsmallcase());
+    },[dispatch])
     const togglePunctuationHandler = useCallback(() => {
         dispatch(togglePunctuation());
     },[dispatch])
@@ -161,9 +165,9 @@ const Menu = ({ isHidden = false }) => {
     },[dispatch])
 
     const updateParaLinesHandler = useCallback(() => {
-        const baseEditedLines = editParaLines(type, paraLines, fullstop, punctuation, numbers, symbols);
+        const baseEditedLines = editParaLines(type, paraLines, fullstop, allsmallcase, punctuation, numbers, symbols);
 
-        if (type === 'para' && (fullstop || punctuation || numbers || symbols)) {
+        if (type === 'para' && (fullstop || allsmallcase || punctuation || numbers || symbols)) {
           const editedPara = baseEditedLines.join(' ');
           const reflowedEditedLines = convertParaToLines(editedPara);
 
@@ -176,7 +180,7 @@ const Menu = ({ isHidden = false }) => {
         dispatch(updateParaLines({
           editedParaLines: baseEditedLines
         }));
-    }, [dispatch, type, paraLines, fullstop, punctuation, numbers, symbols, convertParaToLines])
+    }, [dispatch, type, paraLines, fullstop, allsmallcase, punctuation, numbers, symbols, convertParaToLines])
 
     const selectTimeHandler = useCallback((nextTime) => {
       if (selectedTime === nextTime) {
@@ -262,6 +266,13 @@ const Menu = ({ isHidden = false }) => {
             <>
               <div className="flex flex-col items-center gap-2">
                 <div className="flex items-end gap-2">
+                  <span
+                    title="All small case"
+                    onClick={toggleAllsmallcaseHandler}
+                    className={optionStyle(allsmallcase)}
+                  >
+                    #abc
+                  </span>
                   <span
                     title="Full stop"
                     onClick={toggleFullstopHandler}

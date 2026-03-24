@@ -13,6 +13,7 @@ const initialState = {
     selectedTime: null,
     type:'para',
     fullstop:false,
+    allsmallcase:false,
     punctuation:false,
     numbers:false,
     symbols:false,
@@ -37,6 +38,7 @@ const typingSlice = createSlice({
             state.selectedTime = null;
             state.type = "para",
             state.fullstop = false,
+            state.allsmallcase = false,
             state.punctuation = false,
             state.numbers = false,
             state.symbols = false,
@@ -67,6 +69,9 @@ const typingSlice = createSlice({
         },
         toggleFullstop : (state) => {
             state.fullstop = !state.fullstop;
+        },
+        toggleAllsmallcase : (state) => {
+            state.allsmallcase = !state.allsmallcase;
         },
         togglePunctuation : (state) => {
             state.punctuation = !state.punctuation;
@@ -100,6 +105,7 @@ export const {
     stopTyping, 
     bailOut, 
     toggleFullstop,
+    toggleAllsmallcase,
     togglePunctuation, 
     toggleNumbers, 
     toggleSymbols , 
