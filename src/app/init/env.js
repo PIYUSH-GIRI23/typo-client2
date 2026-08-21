@@ -17,8 +17,11 @@ export const env = {
     redis: {
         host: isDevelopment ? process.env.LOCAL_REDIS_HOST : process.env.CLOUD_REDIS_HOST,
         port: parseInt(isDevelopment ? process.env.LOCAL_REDIS_PORT : process.env.CLOUD_REDIS_PORT) || 6379,
-        password: isDevelopment ? process.env.LOCAL_REDIS_PASSWORD : process.env.CLOUD_REDIS_PASSWORD
-    }, 
+        password: isDevelopment ? process.env.LOCAL_REDIS_PASSWORD : process.env.CLOUD_REDIS_PASSWORD,
+        usernameKeyPrefix: process.env.REDIS_USERNAME_KEY_PREFIX || 'typo:username:',
+        leaderboardKey: process.env.REDIS_LEADERBOARD_KEY || 'typo:leaderboard'
+    },
+ 
 
     userRoutes: {
         signup: process.env.SIGNUP_ROUTE || '/api/users/register',
