@@ -1,6 +1,27 @@
 import {validateEmail, validateResetPasswordInput, validateUsername, validateDeleteAccountInput} from "@/app/utils/authValidation.js";
 import {env} from "@/app/init/env.js";
 
+const getForwardHeaders = async () => {
+  try {
+    const { headers } = await import("next/headers");
+    const reqHeaders = await headers();
+    const forwardHeaders = {};
+    const ua = reqHeaders.get("user-agent");
+    const cfIp = reqHeaders.get("cf-connecting-ip");
+    const forwardedFor = reqHeaders.get("x-forwarded-for");
+    const realIp = reqHeaders.get("x-real-ip");
+
+    if (ua) forwardHeaders["user-agent"] = ua;
+    if (cfIp) forwardHeaders["cf-connecting-ip"] = cfIp;
+    if (forwardedFor) forwardHeaders["x-forwarded-for"] = forwardedFor;
+    if (realIp) forwardHeaders["x-real-ip"] = realIp;
+
+    return forwardHeaders;
+  } catch (e) {
+    return {};
+  }
+};
+
 const checkUsernameAvailability = async(payload) => {
   if(!payload || !payload.username) {
     throw new Error('Username is required');
@@ -10,11 +31,13 @@ const checkUsernameAvailability = async(payload) => {
     throw new Error(validation.message);
   }
   const url = `${env.serverUrl}${env.userRoutes.checkUsername}${'?username=' + encodeURIComponent(validation.data)}`;
+  const forwardHeaders = await getForwardHeaders();
 
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      ...forwardHeaders,
     },
   });
   const data = await response.json();
@@ -33,11 +56,13 @@ const sendOTP = async(payload) => {
   }
 
   const url = `${env.serverUrl}${env.userRoutes.sendOtp}`;
+  const forwardHeaders = await getForwardHeaders();
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...forwardHeaders,
     },
     body: JSON.stringify({ email: validation.data })
   });
@@ -58,11 +83,13 @@ const resetPassword = async(payload) => {
   }
   
   const url = `${env.serverUrl}${env.userRoutes.resetPassword}`;
+  const forwardHeaders = await getForwardHeaders();
   
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...forwardHeaders,
     },
     body: JSON.stringify(validation.data)
   });
@@ -97,12 +124,14 @@ const updateUsername = async(payload) => {
     access_token,
     refresh_token
   }
+  const forwardHeaders = await getForwardHeaders();
 
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'token' : JSON.stringify(token)
+      'token' : JSON.stringify(token),
+      ...forwardHeaders,
     },
     body: JSON.stringify({ newUsername: validation.data })
   });
@@ -149,12 +178,14 @@ const deleteAccount = async(payload) => {
     access_token,
     refresh_token
   }
+  const forwardHeaders = await getForwardHeaders();
 
   const response = await fetch(url, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      'token' : JSON.stringify(token)
+      'token' : JSON.stringify(token),
+      ...forwardHeaders,
     },
     body: JSON.stringify(validation.data)
   });
