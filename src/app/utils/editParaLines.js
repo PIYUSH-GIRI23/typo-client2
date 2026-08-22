@@ -1,5 +1,5 @@
-const editParaLines = (type, paraLines, punctuation = false, numbers = false, symbols = false) => {
-    if (type !== 'para' || !Array.isArray(paraLines) || (!punctuation && !numbers && !symbols)) 
+const editParaLines = (type, paraLines, punctuation = false, numbers = false, symbols = false, noPeriod = false) => {
+    if (type !== 'para' || !Array.isArray(paraLines) || (!punctuation && !numbers && !symbols && !noPeriod)) 
         return paraLines;
 
     const allowedSymbols = [",", "$", "&", "@"];
@@ -8,6 +8,10 @@ const editParaLines = (type, paraLines, punctuation = false, numbers = false, sy
         if (!text || typeof text !== "string") return text;
 
         text = text.trim();
+
+        if (noPeriod) {
+            text = text.replace(/\./g, "");
+        }
 
         // Capitalize sentences if punctuation flag is on
         if (punctuation) {

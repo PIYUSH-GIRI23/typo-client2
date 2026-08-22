@@ -12,6 +12,7 @@ const initialState = {
     timeTaken:0,
     selectedTime: null,
     type:'para',
+    noPeriod:false,
     punctuation:false,
     numbers:false,
     symbols:false,
@@ -35,6 +36,7 @@ const typingSlice = createSlice({
             state.timeTaken = 0;
             state.selectedTime = null;
             state.type = "para",
+            state.noPeriod = false,
             state.punctuation = false,
             state.numbers = false,
             state.symbols = false,
@@ -62,6 +64,9 @@ const typingSlice = createSlice({
         },
         bailOut : (state) => {
             state.isBailedOut = true;
+        },
+        toggleNoPeriod : (state) => {
+            state.noPeriod = !state.noPeriod;
         },
         togglePunctuation : (state) => {
             state.punctuation = !state.punctuation;
@@ -94,6 +99,7 @@ export const {
     updateParaLines, 
     stopTyping, 
     bailOut, 
+    toggleNoPeriod,
     togglePunctuation, 
     toggleNumbers, 
     toggleSymbols , 
