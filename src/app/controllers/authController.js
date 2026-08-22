@@ -8,11 +8,13 @@ const getForwardHeaders = async () => {
     const forwardHeaders = {};
     const ua = reqHeaders.get("user-agent");
     const cfIp = reqHeaders.get("cf-connecting-ip");
+    const vercelIp = reqHeaders.get("x-vercel-forwarded-for");
     const forwardedFor = reqHeaders.get("x-forwarded-for");
     const realIp = reqHeaders.get("x-real-ip");
 
     if (ua) forwardHeaders["user-agent"] = ua;
     if (cfIp) forwardHeaders["cf-connecting-ip"] = cfIp;
+    if (vercelIp) forwardHeaders["x-vercel-forwarded-for"] = vercelIp;
     if (forwardedFor) forwardHeaders["x-forwarded-for"] = forwardedFor;
     if (realIp) forwardHeaders["x-real-ip"] = realIp;
 
